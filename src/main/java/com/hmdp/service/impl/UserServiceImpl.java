@@ -102,6 +102,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.ok(token);
     }
 
+    @Override
+    public Result logout() {
+        //获取当前用户id
+       return null;
+    }
+
     private User createUserWithPhone(String phone) {
         User user = new User();
         user.setCreateTime(LocalDateTime.now());
