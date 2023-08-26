@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import static com.hmdp.utils.RedisConstants.SHOP_GEO_KEY;
+import static com.hmdp.utils.enumUtil.RedisConstants.SHOP_GEO_KEY;
 
 @SpringBootTest
 public class loadShopDate {

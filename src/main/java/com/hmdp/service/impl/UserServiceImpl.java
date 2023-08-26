@@ -12,8 +12,8 @@ import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.User;
 import com.hmdp.mapper.UserMapper;
 import com.hmdp.service.IUserService;
-import com.hmdp.utils.RegexUtils;
-import com.hmdp.utils.UserHolder;
+import com.hmdp.utils.systemUtil.RegexUtils;
+import com.hmdp.utils.systemUtil.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.BitFieldSubCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.hmdp.utils.RedisConstants.*;
-import static com.hmdp.utils.SystemConstants.USER_NICK_NAME_PREFIX;
+import static com.hmdp.utils.enumUtil.RedisConstants.*;
+import static com.hmdp.utils.enumUtil.SystemConstants.USER_NICK_NAME_PREFIX;
 
 /**
  * <p>
@@ -56,7 +56,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //正确，生成验证码,并保存到Redis
         String code = RandomUtil.randomNumbers(6);
         stringRedisTemplate.opsForValue().set(LOGIN_CODE_KEY+phone,code,LOGIN_CODE_TTL, TimeUnit.MINUTES);
-//        session.setAttribute("code",code);
         //发送验证码
         log.info("验证码========>{}",code);
         //返回ok
@@ -74,7 +73,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             return Result.fail("手机格式错误！");
         }
         //验证验证码受否正确,从Redis中取出验证码
-//        Object cacheCode = session.getAttribute("code");
         String cacheCode = stringRedisTemplate.opsForValue().get(LOGIN_CODE_KEY + phone);
         if(cacheCode == null || !cacheCode.equals(code)){
             //验证码不一致
@@ -84,7 +82,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         LambdaQueryWrapper<User> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(User::getPhone,phone);
         User user = this.getOne(lambdaQueryWrapper);
-//        User user = query().eq("phone", phone).one();
         //不存在
         if(user == null){
             user = createUserWithPhone(phone);
@@ -93,6 +90,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         //生成token，作为登录令牌
         String token = UUID.randomUUID().toString(true);
         //将user转化为Hash储存
+        //只需要保存基本信息，转化为UserDto做到信息屏蔽，保护隐私
         UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
         //设置对象里的值都转化为String储存在Redis中，也可以自己手动创建新的Map一个个转换，这里用到了万能工具类
         Map<String, Object> userMap = BeanUtil.beanToMap(userDTO,new HashMap<>(),
@@ -108,8 +106,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Result logout() {
-        //获取当前用户id
-       return null;
+        //清除ThreadLocal中的用户信息，这样在拦截器哪里在ThreadLocal中查询不到用户信息自然会被拦截，跳转到登录界面
+        //手动删除ThreadLocal中的用户信息，可以避免内存泄漏，因为是弱引用，gc后key会回收，而value是强引用不会被回收
+        UserHolder.removeUser();
+       return Result.ok();
     }
 
     @Override

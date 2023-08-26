@@ -9,7 +9,7 @@ import com.hmdp.entity.User;
 import com.hmdp.entity.UserInfo;
 import com.hmdp.service.IUserInfoService;
 import com.hmdp.service.IUserService;
-import com.hmdp.utils.UserHolder;
+import com.hmdp.utils.systemUtil.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,6 +63,10 @@ public class UserController {
         return userService.logout();
     }
 
+    /**
+     * 登陆状态检验
+     * @return
+     */
     @GetMapping("/me")
     public Result me(){
         //获取当前登录的用户并返回
@@ -70,6 +74,11 @@ public class UserController {
         return Result.ok(userDTO);
     }
 
+    /**
+     * 查询用户详细信息
+     * @param userId
+     * @return
+     */
     @GetMapping("/info/{id}")
     public Result info(@PathVariable("id") Long userId){
         // 查询详情
@@ -84,6 +93,11 @@ public class UserController {
         return Result.ok(info);
     }
 
+    /**
+     * 查询用户基本信息
+     * @param userId
+     * @return
+     */
     @GetMapping("/{id}")
     public Result queryUserById(@PathVariable("id") Long userId){
         // 查询详情

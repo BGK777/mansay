@@ -1,11 +1,10 @@
-package com.hmdp.utils;
+package com.hmdp.utils.lookUtil;
 
 import cn.hutool.core.lang.UUID;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -27,7 +26,7 @@ public class SimpleRedisLock {
     //初始化Lua脚本
     static {
         UNLOCK_SCRIPT = new DefaultRedisScript<>();
-        UNLOCK_SCRIPT.setLocation(new ClassPathResource("unlock.lua"));
+        UNLOCK_SCRIPT.setLocation(new ClassPathResource("luacof/unlock.lua"));
         UNLOCK_SCRIPT.setResultType(Long.class);
     }
 

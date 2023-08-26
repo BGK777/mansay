@@ -6,11 +6,9 @@ import com.hmdp.dto.Result;
 import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.Blog;
 import com.hmdp.service.IBlogService;
-import com.hmdp.service.IFollowService;
 import com.hmdp.service.IUserService;
-import com.hmdp.utils.SystemConstants;
-import com.hmdp.utils.UserHolder;
-import jdk.internal.org.objectweb.asm.tree.analysis.Value;
+import com.hmdp.utils.enumUtil.SystemConstants;
+import com.hmdp.utils.systemUtil.UserHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -30,8 +28,6 @@ public class BlogController {
 
     @Resource
     private IBlogService blogService;
-    @Resource
-    private IUserService userService;
 
     @PostMapping
     public Result saveBlog(@RequestBody Blog blog) {
@@ -60,6 +56,11 @@ public class BlogController {
         return blogService.getHotBlog(current);
     }
 
+    /**
+     * 根据id获取blog
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public Result getBlogById(@PathVariable("id") Long id) {
         return blogService.getBlogById(id);

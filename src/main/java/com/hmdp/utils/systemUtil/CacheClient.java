@@ -1,21 +1,25 @@
-package com.hmdp.utils;
+package com.hmdp.utils.systemUtil;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.hmdp.dto.RedisData;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static com.hmdp.utils.RedisConstants.CACHE_NULL_TTL;
-import static com.hmdp.utils.RedisConstants.LOCK_SHOP_KEY;
+import static com.hmdp.utils.enumUtil.RedisConstants.CACHE_NULL_TTL;
+import static com.hmdp.utils.enumUtil.RedisConstants.LOCK_SHOP_KEY;
 
 /**
  * 缓存问题解决工具包
@@ -36,6 +40,13 @@ public class CacheClient {
         stringRedisTemplate.opsForValue().set(key, JSONUtil.toJsonStr(value), time, unit);
     }
 
+    /**
+     * 设置逻辑过期
+     * @param key
+     * @param value
+     * @param time
+     * @param unit
+     */
     public void setWithLogicalExpire(String key, Object value, Long time, TimeUnit unit) {
         // 设置逻辑过期
         RedisData redisData = new RedisData();
@@ -63,7 +74,7 @@ public class CacheClient {
         // 1.从redis查询商铺缓存
         String json = stringRedisTemplate.opsForValue().get(key);
         // 2.判断是否存在
-        if (StrUtil.isNotBlank(json)) {
+        if (CharSequenceUtil.isNotBlank(json)) {
             // 3.存在，直接返回
             return JSONUtil.toBean(json, type);
         }
@@ -105,8 +116,8 @@ public class CacheClient {
         // 1.从redis查询商铺缓存
         String json = stringRedisTemplate.opsForValue().get(key);
         // 2.判断是否存在
-        if (StrUtil.isBlank(json)) {
-            // 3.存在，直接返回
+        if (CharSequenceUtil.isBlank(json)) {
+            // 3.不存在，直接返回
             return null;
         }
         // 4.命中，需要先把json反序列化为对象
@@ -162,7 +173,7 @@ public class CacheClient {
         // 1.从redis查询商铺缓存
         String shopJson = stringRedisTemplate.opsForValue().get(key);
         // 2.判断是否存在
-        if (StrUtil.isNotBlank(shopJson)) {
+        if (CharSequenceUtil.isNotBlank(shopJson)) {
             // 3.存在，直接返回
             return JSONUtil.toBean(shopJson, type);
         }

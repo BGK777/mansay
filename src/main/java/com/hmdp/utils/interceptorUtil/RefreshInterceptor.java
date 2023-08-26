@@ -1,7 +1,8 @@
-package com.hmdp.utils;
+package com.hmdp.utils.interceptorUtil;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.hmdp.dto.UserDTO;
+import com.hmdp.utils.systemUtil.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -10,16 +11,21 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.hmdp.utils.RedisConstants.LOGIN_USER_KEY;
-import static com.hmdp.utils.RedisConstants.LOGIN_USER_TTL;
+import static com.hmdp.utils.enumUtil.RedisConstants.LOGIN_USER_KEY;
+import static com.hmdp.utils.enumUtil.RedisConstants.LOGIN_USER_TTL;
 
 /**
  * 刷新拦截器
+ * 主要工作是刷新token 不需要拦截
  */
 public class RefreshInterceptor implements HandlerInterceptor {
 
     private StringRedisTemplate stringRedisTemplate;
 
+    /**
+     * redis客户端通过构造器注入
+     * @param stringRedisTemplate
+     */
     public RefreshInterceptor(StringRedisTemplate stringRedisTemplate) {
         this.stringRedisTemplate = stringRedisTemplate;
     }
@@ -32,7 +38,6 @@ public class RefreshInterceptor implements HandlerInterceptor {
             return true;
         }
         //基于token从Redis中获取用户信息
-//        UserDTO userDTO = (UserDTO) session.getAttribute("user");
         Map<Object, Object> userMap = stringRedisTemplate.opsForHash().entries(LOGIN_USER_KEY + token);
         //判断用户是否存在
         if(userMap.isEmpty()){

@@ -1,4 +1,4 @@
-package com.hmdp.utils;
+package com.hmdp.utils.systemUtil;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -23,9 +23,10 @@ public class RedisIdWorker {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+
     /**
      * 序列号的位数
-     * @param keyPrefix
+     * @param keyPrefix 业务前缀
      * @return
      */
     public long nextId(String keyPrefix) {

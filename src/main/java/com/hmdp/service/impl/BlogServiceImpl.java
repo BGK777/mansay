@@ -1,9 +1,9 @@
 package com.hmdp.service.impl;
 
-import cn.hutool.core.util.BooleanUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.dto.Result;
 import com.hmdp.dto.ScrollResult;
 import com.hmdp.dto.UserDTO;
@@ -12,11 +12,10 @@ import com.hmdp.entity.Follow;
 import com.hmdp.entity.User;
 import com.hmdp.mapper.BlogMapper;
 import com.hmdp.service.IBlogService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.service.IFollowService;
 import com.hmdp.service.IUserService;
-import com.hmdp.utils.SystemConstants;
-import com.hmdp.utils.UserHolder;
+import com.hmdp.utils.enumUtil.SystemConstants;
+import com.hmdp.utils.systemUtil.UserHolder;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,8 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hmdp.utils.RedisConstants.BLOG_LIKED_KEY;
-import static com.hmdp.utils.RedisConstants.FEED_KEY;
+import static com.hmdp.utils.enumUtil.RedisConstants.BLOG_LIKED_KEY;
+import static com.hmdp.utils.enumUtil.RedisConstants.FEED_KEY;
 
 /**
  * <p>
@@ -96,19 +95,19 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         }
         //获得id列表
         List<Long> ids = top5.stream().map(Long::valueOf).collect(Collectors.toList());
-        String idStr = StrUtil.join(",", ids);
+        String idStr = CharSequenceUtil.join(",", ids);
         List<User> users = userService.query()
                 .in("id",ids).last("ORDER BY FIELD(id,"+idStr+")").list();
         //把查询到的user列表。转化成userDTO列表并返回
-        List<UserDTO> UserDTOs = new ArrayList<>();
+        List<UserDTO> userDTOS = new ArrayList<>();
         users.forEach(user -> {
             UserDTO userDTO = new UserDTO();
             userDTO.setIcon(user.getIcon());
             userDTO.setId(user.getId());
             userDTO.setNickName(user.getNickName());
-            UserDTOs.add(userDTO);
+            userDTOS.add(userDTO);
         });
-        return Result.ok(UserDTOs);
+        return Result.ok(userDTOS);
     }
 
     @Override
@@ -142,7 +141,6 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     public Result queryBlogOfFollow(Long max, Integer offset) {
         //1.获取当前用户，找到收件箱
         Long userId = UserHolder.getUser().getId();
-        stringRedisTemplate.opsForZSet();
         String key = FEED_KEY + userId;
         Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
                 .reverseRangeByScoreWithScores(key, 0, max, offset, 3);
@@ -168,7 +166,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             }
         }
         //根据id查询blog
-        String idStr = StrUtil.join(",", ids);
+        String idStr = CharSequenceUtil.join(",", ids);
         List<Blog> blogs = query()
                 .in("id",ids).last("ORDER BY FIELD(id,"+idStr+")").list();
         for (Blog blog : blogs) {

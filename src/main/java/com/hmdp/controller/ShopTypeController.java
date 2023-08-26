@@ -1,9 +1,6 @@
 package com.hmdp.controller;
 
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.ListUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.json.JSONUtil;
 import com.hmdp.dto.Result;
 import com.hmdp.entity.ShopType;
@@ -15,11 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.hmdp.utils.RedisConstants.CACHE_SHOPTYPE_TTL;
-import static com.hmdp.utils.RedisConstants.CACHE_SHOP_TYPE;
+import static com.hmdp.utils.enumUtil.RedisConstants.CACHE_SHOPTYPE_TTL;
+import static com.hmdp.utils.enumUtil.RedisConstants.CACHE_SHOP_TYPE;
 
 /**
  * <p>

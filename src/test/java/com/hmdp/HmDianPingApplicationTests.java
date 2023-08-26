@@ -1,7 +1,6 @@
 package com.hmdp;
 
-import com.hmdp.utils.RedisIdWorker;
-import org.junit.jupiter.api.Test;
+import com.hmdp.utils.systemUtil.RedisIdWorker;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -14,12 +13,4 @@ class HmDianPingApplicationTests {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
-
-
-    @Test
-    public void tset() {
-
-        stringRedisTemplate.opsForValue().set("test","hai");
-
-    }
 }
