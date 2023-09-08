@@ -26,7 +26,7 @@ public class SimpleRedisLock {
     //初始化Lua脚本
     static {
         UNLOCK_SCRIPT = new DefaultRedisScript<>();
-        UNLOCK_SCRIPT.setLocation(new ClassPathResource("luacof/unlock.lua"));
+        UNLOCK_SCRIPT.setLocation(new ClassPathResource("luacof//unlock.lua"));
         UNLOCK_SCRIPT.setResultType(Long.class);
     }
 
@@ -56,19 +56,4 @@ public class SimpleRedisLock {
                     ID_PREFIX + Thread.currentThread().getId()
             );
         }
-
-//    /**
-//     * 释放锁
-//     */
-//    public void unlock () {
-//        //获取线程标示
-//        String threadId = ID_PREFIX + Thread.currentThread().getId();
-//        //获取锁的标示
-//        String redisThreadId = stringRedisTemplate.opsForValue().get(KEY_PREFIX + name);
-//        //判断标示是否一致
-//        if (threadId.equals(redisThreadId)) {
-//            //释放锁
-//            stringRedisTemplate.delete(KEY_PREFIX + name);
-//        }
-//    }
     }

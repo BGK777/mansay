@@ -118,8 +118,10 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
+                    <include>**/*</include>
                     <include>**/*.yml</include>
                     <include>**/*.xml</include>
+                    <include>**/*.lua</include>
                 </includes>
             </resource>
             <!--指定将resources中配置文件加载到target-->
