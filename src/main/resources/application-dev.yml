@@ -28,3 +28,5 @@ logging:
 
 redisconf:
   url: "redis://192.168.111.100:6379"
+
+IMAGE_UPLOAD_DIR: "D:\\lesson\\nginx-1.18.0\\html\\hmdp\\imgs"

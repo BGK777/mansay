@@ -28,3 +28,5 @@ logging:
 
 redisconf:
   url: "redis://127.0.0.1:6379"
+
+IMAGE_UPLOAD_DIR: "/www/server/nginx/html/hmdp/imgs"
