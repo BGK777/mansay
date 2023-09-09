@@ -68,6 +68,9 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private class VoucherOrderHandler implements Runnable {
         String queueName = "stream.orders";
 
+        /**
+         * 循环获取消息队列消息并处理，如果发生异常，交给异常处理handlePendingList
+         */
         @Override
         public void run() {
             while (true) {
@@ -83,20 +86,31 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                         //2.1失败说明没有消息，继续下一次循环
                         continue;
                     }
-                    MapRecord<String, Object, Object> record = list.get(0);
-                    Map<Object, Object> value = record.getValue();
-                    VoucherOrder voucherOrder = BeanUtil.fillBeanWithMap(value, new VoucherOrder(), true);
-                    //3.成功，可以下单
-                    createVoucherOrder(voucherOrder);
-                    //ACK确认
-                    stringRedisTemplate.opsForStream().acknowledge(queueName, "g1", record.getId());
+                    orderAndACK(list);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     handlePendingList();
                 }
             }
         }
 
+        /**
+         * 解析消息队列消息并执行下单，ACK消息消费确定
+         * @param list
+         */
+        private void orderAndACK(List<MapRecord<String, Object, Object>> list) {
+            // 解析数据
+            MapRecord<String, Object, Object> record = list.get(0);
+            Map<Object, Object> value = record.getValue();
+            VoucherOrder voucherOrder = BeanUtil.fillBeanWithMap(value, new VoucherOrder(), true);
+            //3.成功，可以下单
+            createVoucherOrder(voucherOrder);
+            //ACK确认
+            stringRedisTemplate.opsForStream().acknowledge(queueName, "g1", record.getId());
+        }
+
+        /**
+         * 处理异常消息，还异常的话，等待后再次循环处理
+         */
         private void handlePendingList() {
             while (true) {
                 try {
@@ -112,15 +126,8 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                         break;
                     }
                     // 解析数据
-                    MapRecord<String, Object, Object> record = list.get(0);
-                    Map<Object, Object> value = record.getValue();
-                    VoucherOrder voucherOrder = BeanUtil.fillBeanWithMap(value, new VoucherOrder(), true);
-                    // 3.创建订单
-                    createVoucherOrder(voucherOrder);
-                    // 4.确认消息 XACK
-                    stringRedisTemplate.opsForStream().acknowledge(queueName, "g1", record.getId());
+                    orderAndACK(list);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     try {
                         Thread.sleep(20);
                     } catch (InterruptedException ex) {
@@ -142,7 +149,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         //1.1获取用户id
         //订单id
         long orderId = redisIdWorker.nextId("order");
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         Long result = stringRedisTemplate.execute(
                 SECKILL_SCRIPT,
                 Collections.emptyList(),
@@ -160,10 +167,10 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
 
     /**
-     * 消费消息队列信息后，调用此方法创建订单
+     * 消费消息队列信息后，调用此方法创建订单 rollbackFor = Exception.class作用是运行时异常和非运行时异常都会发生回滚
      * @param voucherOrder
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void createVoucherOrder(VoucherOrder voucherOrder) {
         Long userId = voucherOrder.getUserId();
         // 创建锁对象（兜底）

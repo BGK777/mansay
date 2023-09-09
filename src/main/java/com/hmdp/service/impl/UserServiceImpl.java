@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.crypto.digest.MD5;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.dto.LoginFormDTO;
@@ -25,7 +24,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -135,15 +133,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         lambdaQueryWrapper.eq(User::getPhone,phone);
         User user = this.getOne(lambdaQueryWrapper);
 
-        //不存在
+        //用户不存在
         if(user == null){
             user = createUserWithPhone(phone,password);
+            // 用户存在且为密码登录
         }else if (!StringUtils.isEmpty(password)){
             String md5DigestAsHex = DigestUtils.md5DigestAsHex(password.getBytes());
             if (user.getPassword() == null || Objects.equals(user.getPassword(), "")){
                 user.setPassword(md5DigestAsHex);
                 saveOrUpdate(user);
-            }else {
+            }else { //有密码，进行验证
                 if (!md5DigestAsHex.equals(user.getPassword())) return  Result.fail("密码错误!");
             }
         }
@@ -180,14 +179,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     public Result logout() {
         //清除ThreadLocal中的用户信息，这样在拦截器哪里在ThreadLocal中查询不到用户信息自然会被拦截，跳转到登录界面
         //手动删除ThreadLocal中的用户信息，可以避免内存泄漏，因为是弱引用，gc后key会回收，而value是强引用不会被回收
-        UserHolder.removeUser();
+        UserHolder.getThreadLocal().remove();
        return Result.ok();
     }
 
     @Override
     public Result sign() {
         //获取用户id
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         //获取日期
         LocalDateTime now = LocalDateTime.now();
         String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));
@@ -203,7 +202,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Override
     public Result signCount() {
         //获取用户id
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         //获取日期
         LocalDateTime now = LocalDateTime.now();
         String keySuffix = now.format(DateTimeFormatter.ofPattern(":yyyyMM"));

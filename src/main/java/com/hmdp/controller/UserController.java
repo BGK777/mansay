@@ -70,7 +70,7 @@ public class UserController {
     @GetMapping("/me")
     public Result me(){
         //获取当前登录的用户并返回
-        UserDTO userDTO = UserHolder.getUser();
+        UserDTO userDTO = UserHolder.getThreadLocal().get();
         return Result.ok(userDTO);
     }
 

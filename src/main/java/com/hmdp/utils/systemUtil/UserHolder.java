@@ -3,17 +3,31 @@ package com.hmdp.utils.systemUtil;
 import com.hmdp.dto.UserDTO;
 
 public class UserHolder {
-    private static final ThreadLocal<UserDTO> tl = new ThreadLocal<>();
+    //唯一ThreadLocal实例
+    public ThreadLocal<UserDTO> tl;
 
-    public static void saveUser(UserDTO userDTO){
-        tl.set(userDTO);
+    //私有化工具类构造器
+    private UserHolder(){
+        tl = new ThreadLocal<>();
     }
 
-    public static UserDTO getUser(){
-        return tl.get();
+    static class inner {
+        private static final UserHolder userHolder = new UserHolder();
     }
 
-    public static void removeUser(){
-        tl.remove();
+    public static ThreadLocal<UserDTO> getThreadLocal(){
+        return inner.userHolder.tl;
     }
+
+//    public static void saveUser(UserDTO userDTO){
+//        getThreadLocal().set(userDTO);
+//    }
+//
+//    public static UserDTO getUser(){
+//        return getThreadLocal().get();
+//    }
+//
+//    public static void removeUser(){
+//        getThreadLocal().remove();
+//    }
 }

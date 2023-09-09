@@ -46,7 +46,7 @@ public class RefreshInterceptor implements HandlerInterceptor {
         //将查询到的hashUser转化成userDto对象
         UserDTO userDTO = BeanUtil.fillBeanWithMap(userMap, new UserDTO(), false);
         //设置到ThreadLocal
-        UserHolder.saveUser(userDTO);
+        UserHolder.getThreadLocal().set(userDTO);
         //刷新token有效期
         stringRedisTemplate.expire(LOGIN_USER_KEY+token,LOGIN_USER_TTL, TimeUnit.MINUTES);
         //放行
@@ -55,6 +55,7 @@ public class RefreshInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-
+        //进行资源的清理，请求结束后自动删除ThreadLocal中的用户信息
+        UserHolder.getThreadLocal().remove();
     }
 }

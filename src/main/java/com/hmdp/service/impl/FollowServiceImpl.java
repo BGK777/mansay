@@ -45,7 +45,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     @Override
     public Result follow(Long followId, boolean isFollow) {
         //获取用户id
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         String key = "follows:" + userId;
         //判断是关注还是取关
         if (isFollow) {
@@ -80,7 +80,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     @Override
     public Result followOrNot(Long followId) {
         //获取用户id
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         LambdaQueryWrapper<Follow> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(Follow::getUserId, userId).eq(Follow::getFollowUserId, followId);
         int count = count(lambdaQueryWrapper);
@@ -95,7 +95,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow> impleme
     @Override
     public Result common(Long id) {
         //1.获取当前用户
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         String key1 = "follows:" + userId;
         //2.求交集
         String key2 = "follows:" + id;

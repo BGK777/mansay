@@ -23,10 +23,10 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/user/code",
                         "/user/login",
                         "/blog/hot",
-                        "/upload/**",
+                        "/shop/**",
                         "/shop-type/**",
-                        "/voucher/**",
-                        "/shop/**"
+                        "/upload/**",
+                        "/voucher/**"
                 ).order(1);//order越小优先级越高，不配置默认是0
 
         //添加刷新token拦截器

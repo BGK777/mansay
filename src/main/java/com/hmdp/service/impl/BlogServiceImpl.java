@@ -62,7 +62,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     @Override
     public Result likedBlog(Long id) {
         //1.获取的登录用户id
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         String blogKey = BLOG_LIKED_KEY + id;
         //2.判断用户是否点赞
         Double score = stringRedisTemplate.opsForZSet().score(blogKey, userId.toString());
@@ -113,7 +113,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     @Override
     public Result saveBlog(Blog blog) {
         // 获取登录用户
-        UserDTO userDTO = UserHolder.getUser();
+        UserDTO userDTO = UserHolder.getThreadLocal().get();
         Long userId = userDTO.getId();
         blog.setUserId(userId);
         // 保存探店博文
@@ -140,7 +140,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     @Override
     public Result queryBlogOfFollow(Long max, Integer offset) {
         //1.获取当前用户，找到收件箱
-        Long userId = UserHolder.getUser().getId();
+        Long userId = UserHolder.getThreadLocal().get().getId();
         String key = FEED_KEY + userId;
         Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
                 .reverseRangeByScoreWithScores(key, 0, max, offset, 3);
@@ -201,7 +201,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
 
     private void isBlogLike(Blog blog) {
         //1.获取的登录用户id
-        UserDTO user = UserHolder.getUser();
+        UserDTO user = UserHolder.getThreadLocal().get();
         if(user == null){
             //用户未登录，无需查询是否点赞
             return ;
