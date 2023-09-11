@@ -134,16 +134,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         User user = this.getOne(lambdaQueryWrapper);
 
         //用户不存在
-        if(user == null){
-            user = createUserWithPhone(phone,password);
-            // 用户存在且为密码登录
-        }else if (!StringUtils.isEmpty(password)){
-            String md5DigestAsHex = DigestUtils.md5DigestAsHex(password.getBytes());
-            if (user.getPassword() == null || Objects.equals(user.getPassword(), "")){
-                user.setPassword(md5DigestAsHex);
-                saveOrUpdate(user);
-            }else { //有密码，进行验证
-                if (!md5DigestAsHex.equals(user.getPassword())) return  Result.fail("密码错误!");
+        if (user == null) {
+            user = createUserWithPhone(phone, password);
+        } else {
+            // 用户存在，进行密码验证
+            if (!StringUtils.isEmpty(password)) {
+                String md5DigestAsHex = DigestUtils.md5DigestAsHex(password.getBytes());
+                if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                    user.setPassword(md5DigestAsHex);
+                    saveOrUpdate(user);
+                } else if (!md5DigestAsHex.equals(user.getPassword())) {
+                    return Result.fail("密码错误!");
+                }
             }
         }
 
@@ -247,8 +249,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setUpdateTime(LocalDateTime.now());
         user.setPhone(phone);
         //MD5加密
-        String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
-        user.setPassword(md5Password);
+        //判断是否有传入密码
+        if(!StringUtils.isEmpty(password)){
+            String md5Password = DigestUtils.md5DigestAsHex(password.getBytes());
+            user.setPassword(md5Password);
+        }
         user.setNickName(USER_NICK_NAME_PREFIX+RandomUtil.randomString(6));
         this.save(user);
         return user;
