@@ -2,6 +2,7 @@ package com.hmdp.controller;
 
 
 import cn.hutool.core.bean.BeanUtil;
+import com.hmdp.dto.EditUserDto;
 import com.hmdp.dto.LoginFormDTO;
 import com.hmdp.dto.Result;
 import com.hmdp.dto.UserDTO;
@@ -14,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpSession;
 
 /**
  * <p>
@@ -55,6 +55,17 @@ public class UserController {
     }
 
     /**
+     * 保存个人信息涉及UserInfo和User
+     * @param editUserDto
+     * @return
+     */
+    @PostMapping("/save")
+    public Result save(@RequestBody EditUserDto editUserDto){
+        UserInfo userInfo = userInfoService.saveInfo(editUserDto);
+        return Result.ok(userInfo);
+    }
+
+    /**
      * 登出功能
      * @return 无
      */
@@ -64,13 +75,14 @@ public class UserController {
     }
 
     /**
-     * 登陆状态检验
+     * 获取登录用户信息
      * @return
      */
     @GetMapping("/me")
     public Result me(){
         //获取当前登录的用户并返回
-        UserDTO userDTO = UserHolder.getThreadLocal().get();
+        Long userId = UserHolder.getThreadLocal().get().getId();
+        UserDTO userDTO = userService.getMe(userId);
         return Result.ok(userDTO);
     }
 

@@ -1,4 +1,4 @@
-package com.hmdp.utils.interceptorUtil;
+package com.hmdp.interceptor;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.hmdp.dto.UserDTO;

@@ -1,10 +1,19 @@
 package com.hmdp.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.hmdp.dto.EditUserDto;
+import com.hmdp.dto.UserDTO;
+import com.hmdp.entity.User;
 import com.hmdp.entity.UserInfo;
 import com.hmdp.mapper.UserInfoMapper;
 import com.hmdp.service.IUserInfoService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmdp.service.IUserService;
+import com.hmdp.utils.systemUtil.UserHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.Resource;
 
 /**
  * <p>
@@ -17,8 +26,32 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> implements IUserInfoService {
 
+    @Resource
+    private IUserService userService;
+
     @Override
     public void updateInfo(UserInfo userInfo) {
         updateById(userInfo);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public UserInfo saveInfo(EditUserDto editUserDto) {
+        UserDTO userDTO = UserHolder.getThreadLocal().get();
+        Long userId = userDTO.getId();
+//        //保存到ThreadLocal
+//        userDTO.setNickName(editUserDto.getNickName());
+//        UserHolder.getThreadLocal().set(userDTO);
+        //保存到数据库User表
+        User user = userService.getById(userId);
+        user.setNickName(editUserDto.getNickName());
+        userService.updateById(user);
+
+        //保存到数据库Info表
+        UserInfo userInfo = getById(userId);
+        BeanUtil.copyProperties(editUserDto,userInfo);
+        userInfo.setUserId(userId);
+        updateById(userInfo);
+        return userInfo;
     }
 }

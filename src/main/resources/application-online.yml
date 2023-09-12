@@ -3,6 +3,10 @@ server:
 spring:
   application:
     name: hmdp
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/hmdp?useSSL=false&serverTimezone=UTC
@@ -30,3 +34,11 @@ redisconf:
   url: "redis://127.0.0.1:6379"
 
 IMAGE_UPLOAD_DIR: "/www/server/nginx/html/hmdp/imgs"
+
+aliyun:
+  oss:
+    file:
+      bucketname: mansay
+      endpoint: oss-cn-shenzhen.aliyuncs.com
+      keyid: LTAI5tPAGbNpuQSdjfdgv9yz
+      keysecret: bexYzKJ3A95XZLF8CSMWlHaaJnig2k

@@ -1,4 +1,4 @@
-package com.hmdp.utils.interceptorUtil;
+package com.hmdp.interceptor;
 
 import com.hmdp.dto.UserDTO;
 import com.hmdp.utils.systemUtil.UserHolder;

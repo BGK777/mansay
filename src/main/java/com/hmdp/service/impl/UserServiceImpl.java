@@ -243,6 +243,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         return Result.ok(count);
     }
 
+    @Override
+    public UserDTO getMe(Long userId) {
+        User user = getById(userId);
+        UserDTO userDTO = new UserDTO();
+        BeanUtil.copyProperties(user,userDTO);
+        return userDTO;
+    }
+
     private User createUserWithPhone(String phone,String password) {
         User user = new User();
         user.setCreateTime(LocalDateTime.now());

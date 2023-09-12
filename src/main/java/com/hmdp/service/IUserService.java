@@ -3,6 +3,7 @@ package com.hmdp.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hmdp.dto.LoginFormDTO;
 import com.hmdp.dto.Result;
+import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.User;
 
 import javax.servlet.http.HttpSession;
@@ -27,4 +28,5 @@ public interface IUserService extends IService<User> {
 
     Result signCount();
 
+    UserDTO getMe(Long userId);
 }
