@@ -10,6 +10,8 @@ import com.hmdp.utils.enumUtil.SystemConstants;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * <p>
@@ -25,6 +27,17 @@ public class ShopController {
 
     @Resource
     public IShopService shopService;
+
+//    /**
+//     * 模糊查询店铺列表
+//     * @param shopName
+//     * @return
+//     */
+//    @GetMapping("/like/{shopName}")
+//    public Result like(@PathVariable("shopName") String shopName){
+//        List<Shop> list = shopService.getShopByLike(shopName);
+//        return Result.ok(list);
+//    }
 
     /**
      * 根据id查询商铺信息
@@ -71,11 +84,12 @@ public class ShopController {
      * @param current 页码
      * @return 商铺列表
      */
-    @GetMapping("/of/type")
+    @PostMapping("/of/type/{typeId}/{current}")
     public Result queryShopByType(
-            @RequestParam("typeId") Integer typeId,
-            @RequestParam(value = "current", defaultValue = "1") Integer current) {
-        return shopService.queryShopByType(typeId, current);
+            @PathVariable("typeId") Integer typeId,
+            @PathVariable("current") Integer current,
+            @RequestBody(required = false) String name) throws UnsupportedEncodingException {
+        return shopService.queryShopByType(typeId, current,name);
     }
 
     /**

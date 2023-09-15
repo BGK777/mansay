@@ -1,6 +1,6 @@
 package com.hmdp.utils.enumUtil;
 
-public class SystemConstants {
+public class  SystemConstants {
     public static final String IMAGE_UPLOAD_DIR = "src/main/resources/image";
     public static final String USER_NICK_NAME_PREFIX = "user_";
     public static final int DEFAULT_PAGE_SIZE = 5;

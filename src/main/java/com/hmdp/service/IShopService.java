@@ -4,6 +4,9 @@ import com.hmdp.dto.Result;
 import com.hmdp.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -18,7 +21,8 @@ public interface IShopService extends IService<Shop> {
 
     Result update(Shop shop);
 
-    Result queryShopByType(Integer typeId, Integer current);
+    Result queryShopByType(Integer typeId, Integer current,String name) throws UnsupportedEncodingException;
+
 }
 
 

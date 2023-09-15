@@ -1,14 +1,13 @@
 package com.hmdp.controller;
 
 
-import com.hmdp.dto.CommentDto;
 import com.hmdp.dto.Result;
 import com.hmdp.service.CommentService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * (Comment)表控制层
@@ -33,8 +32,8 @@ public class CommentController{
     public Result selectAll(@PathVariable("blogId") Long blogId,
                             @PathVariable("page") Integer page,
                             @PathVariable("size") Integer size) {
-        ArrayList<CommentDto> list =  commentService.getPage(blogId,page,size);
-        return Result.ok(list);
+        HashMap<String, Object> map =  commentService.getPage(blogId,page,size);
+        return Result.ok(map);
     }
 
     /**
@@ -44,9 +43,8 @@ public class CommentController{
      * @return 新增结果
      */
     @PostMapping("/save/{blogId}")
-    public Result insert(@PathVariable("blogId") Long blogId,@RequestBody String commentText) throws UnsupportedEncodingException {
-        commentService.saveComment(blogId,commentText);
-        return Result.ok();
+    public Result insert(@PathVariable("blogId") Long blogId,@RequestBody(required = false) String commentText) throws UnsupportedEncodingException {
+        return commentService.saveComment(blogId,commentText);
     }
 
     /**
@@ -56,7 +54,8 @@ public class CommentController{
      * @return 更新结果
      */
     @PostMapping("/update/{id}")
-    public Result update(@PathVariable("id") Long id,@RequestBody String commentText) {
+    public Result update(@PathVariable("id") Long id,
+                         @RequestBody String commentText) {
         commentService.updateComment(id,commentText);
         return Result.ok();
     }
@@ -67,9 +66,9 @@ public class CommentController{
      * @param
      * @return 删除结果
      */
-    @DeleteMapping("/delete/{id}")
-    public Result delete(@PathVariable("id") Long id) {
-        commentService.removeById(id);
+    @DeleteMapping("/delete/{commentId}")
+    public Result delete(@PathVariable("commentId") Long commentId) {
+        commentService.removeById(commentId);
         return Result.ok();
     }
 }

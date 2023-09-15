@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentDto {
+
+    private Long id;
+    //评论人ID
+    private Long userId;
     //昵称，默认是随机字符
     private String nickName;
     //用户头像

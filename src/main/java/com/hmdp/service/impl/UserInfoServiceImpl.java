@@ -49,9 +49,16 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
         //保存到数据库Info表
         UserInfo userInfo = getById(userId);
-        BeanUtil.copyProperties(editUserDto,userInfo);
-        userInfo.setUserId(userId);
-        updateById(userInfo);
+        //这里判断这个用户是否是第一次登录，还没有建立详细信息
+        if(userInfo == null){
+            userInfo = new UserInfo();
+            userInfo.setUserId(userId);
+            baseMapper.insert(userInfo);
+        }else {
+
+
+        }        BeanUtil.copyProperties(editUserDto,userInfo);
+        baseMapper.updateById(userInfo);
         return userInfo;
     }
 }

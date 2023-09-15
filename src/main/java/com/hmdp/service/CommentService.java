@@ -1,11 +1,11 @@
 package com.hmdp.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hmdp.dto.CommentDto;
+import com.hmdp.dto.Result;
 import com.hmdp.entity.Comment;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 
 /**
@@ -16,9 +16,9 @@ import java.util.ArrayList;
  */
 public interface CommentService extends IService<Comment> {
 
-    ArrayList<CommentDto> getPage(Long blogId, Integer page, Integer size);
+    HashMap<String, Object> getPage(Long blogId, Integer page, Integer size);
 
-    void saveComment(Long blogId, String commentText) throws UnsupportedEncodingException;
+    Result saveComment(Long blogId, String commentText) throws UnsupportedEncodingException;
 
     void updateComment(Long id, String commentText);
 }

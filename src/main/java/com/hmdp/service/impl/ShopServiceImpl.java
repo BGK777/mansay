@@ -1,6 +1,5 @@
 package com.hmdp.service.impl;
 
-import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -9,24 +8,22 @@ import com.hmdp.dto.Result;
 import com.hmdp.entity.Shop;
 import com.hmdp.mapper.ShopMapper;
 import com.hmdp.service.IShopService;
-import com.hmdp.utils.systemUtil.CacheClient;
 import com.hmdp.utils.enumUtil.SystemConstants;
-import com.sun.org.apache.bcel.internal.generic.NEW;
-import org.springframework.data.domain.Example;
-import org.springframework.data.geo.Distance;
-import org.springframework.data.geo.GeoResult;
-import org.springframework.data.geo.GeoResults;
-import org.springframework.data.redis.connection.RedisGeoCommands;
+import com.hmdp.utils.systemUtil.CacheClient;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.domain.geo.GeoReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.hmdp.utils.enumUtil.RedisConstants.*;
+import static com.hmdp.utils.enumUtil.RedisConstants.CACHE_SHOP_KEY;
+import static com.hmdp.utils.enumUtil.RedisConstants.CACHE_SHOP_TTL;
 
 /**
  * <p>
@@ -90,10 +87,17 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     }
 
     @Override
-    public Result queryShopByType(Integer typeId, Integer current) {
+    public Result queryShopByType(Integer typeId, Integer current,String name) throws UnsupportedEncodingException {
+        if(!StringUtils.isBlank(name)){
+            name = URLDecoder.decode(name, "UTF-8");
+        }
         LambdaQueryWrapper<Shop> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Shop::getTypeId,typeId);
+        lqw.like(!StringUtils.isBlank(name),Shop::getName,name);
         IPage<Shop> page = page(new Page<>(current,SystemConstants.MAX_PAGE_SIZE),lqw);
-        return Result.ok(page.getRecords());
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("list",page.getRecords());
+        map.put("totalPage",page.getPages());
+        return Result.ok(map);
     }
 }
