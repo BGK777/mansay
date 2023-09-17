@@ -1,18 +1,26 @@
 package com.hmdp.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.hmdp.dto.OrderInfoDto;
+import com.hmdp.dto.QureyData;
 import com.hmdp.dto.Result;
 import com.hmdp.entity.SeckillVoucher;
+import com.hmdp.entity.Shop;
+import com.hmdp.entity.Voucher;
 import com.hmdp.entity.VoucherOrder;
 import com.hmdp.mapper.VoucherOrderMapper;
 import com.hmdp.service.ISeckillVoucherService;
+import com.hmdp.service.IShopService;
 import com.hmdp.service.IVoucherOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hmdp.service.IVoucherService;
 import com.hmdp.utils.systemUtil.RedisIdWorker;
 import com.hmdp.utils.systemUtil.ThreadPollUtil;
 import com.hmdp.utils.systemUtil.UserHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.core.io.ClassPathResource;
@@ -25,9 +33,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.time.Duration;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -49,6 +57,10 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private RedissonClient redissonClient;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Resource
+    private IVoucherService voucherService;
+    @Resource
+    private IShopService shopService;
 
     private static final DefaultRedisScript<Long> SECKILL_SCRIPT;
 
@@ -197,5 +209,52 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             // 释放锁
             redisLock.unlock();
         }
+    }
+
+    @Override
+    public ArrayList<OrderInfoDto> pageOrderList(String userId, QureyData qureyData) {
+        //解析搜索条件
+        LocalDateTime startTime = qureyData.getStartTime();
+        LocalDateTime endTime = qureyData.getEndTime();
+        Integer voucherUserStatus = null;
+        Integer voucherType = null;
+        if(!Objects.equals(qureyData.getSelectedValue2(), "")){
+            voucherUserStatus = Integer.valueOf(qureyData.getSelectedValue2());
+        }
+        if(!Objects.equals(qureyData.getSelectedValue1(), "")){
+            voucherType = Integer.valueOf(qureyData.getSelectedValue1());
+        }
+
+        LambdaQueryWrapper<VoucherOrder> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(VoucherOrder::getUserId,userId);
+        lqw.eq(voucherUserStatus!= null,VoucherOrder::getStatus,voucherUserStatus);
+        lqw.ge(!BeanUtil.isEmpty(startTime),VoucherOrder::getCreateTime,startTime);
+        lqw.le(!BeanUtil.isEmpty(endTime),VoucherOrder::getCreateTime,endTime);
+        List<VoucherOrder> list = list(lqw);
+
+        ArrayList<OrderInfoDto> orderInfoList = new ArrayList<>();
+        for (VoucherOrder voucherOrder : list) {
+            //创建一个储存对象
+            OrderInfoDto orderInfoDto = new OrderInfoDto();
+
+            //优惠卷相关信息
+            Voucher voucher = voucherService.getById(voucherOrder.getVoucherId());
+            //如果有优惠券类型要求，不满足要求的这条信息不保存
+            if(voucherType != null && !Objects.equals(voucher.getType(), voucherType)) continue;
+            orderInfoDto.setVoucherStatus(voucher.getStatus());
+            orderInfoDto.setVoucherName(voucher.getTitle());
+
+            //订单相关信息
+            orderInfoDto.setOrderId(voucherOrder.getId());
+            orderInfoDto.setCreateTime(voucherOrder.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+            orderInfoDto.setOrderStatus(voucherOrder.getStatus());
+
+
+            //店铺相关信息
+            Shop shop = shopService.getById(voucher.getShopId());
+            orderInfoDto.setShopName(shop.getName());
+            orderInfoList.add(orderInfoDto);
+        }
+        return orderInfoList;
     }
 }

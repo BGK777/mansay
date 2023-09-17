@@ -10,7 +10,9 @@ import com.hmdp.dto.LoginFormDTO;
 import com.hmdp.dto.Result;
 import com.hmdp.dto.UserDTO;
 import com.hmdp.entity.User;
+import com.hmdp.entity.UserInfo;
 import com.hmdp.mapper.UserMapper;
+import com.hmdp.service.IUserInfoService;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.systemUtil.HttpUtils;
 import com.hmdp.utils.systemUtil.RegexUtils;
@@ -50,6 +52,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
+    @Resource
+    private IUserInfoService userInfoService;
     @Override
     public Result sendCode(String phone) {
         //验证手机号是否正确
@@ -253,8 +257,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     private User createUserWithPhone(String phone,String password) {
         User user = new User();
-        user.setCreateTime(LocalDateTime.now());
-        user.setUpdateTime(LocalDateTime.now());
         user.setPhone(phone);
         //MD5加密
         //判断是否有传入密码
@@ -263,7 +265,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             user.setPassword(md5Password);
         }
         user.setNickName(USER_NICK_NAME_PREFIX+RandomUtil.randomString(6));
-        this.save(user);
+        save(user);
+
+        //并设置UserInfo
+        LambdaQueryWrapper<User> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(User::getPhone,phone);
+        User one = getOne(lqw);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setUserId(one.getId());
+        userInfoService.save(userInfo);
         return user;
     }
 }

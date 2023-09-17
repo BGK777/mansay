@@ -118,15 +118,18 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Result saveBlog(Blog blog) {
+        if (blog.getImages() == null
+                || Objects.equals(blog.getImages(), "")
+                || blog.getTitle() == null || blog.getContent() == null
+                || blog.getShopId() == null){
+            return Result.fail("发布失败,内容，标题，图片，关联商户不能为空！");
+        }
         // 获取登录用户
         UserDTO userDTO = UserHolder.getThreadLocal().get();
         Long userId = userDTO.getId();
         blog.setUserId(userId);
         // 保存探店博文
         boolean isSuccess = save(blog);
-        if(!isSuccess){
-            Result.fail("发布失败,内容，标题等不能为空！");
-        }
         //增加店铺blog数
         Shop shop = shopService.getById(blog.getShopId());
         shop.setComments(shop.getComments()+1);
