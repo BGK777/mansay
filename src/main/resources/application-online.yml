@@ -35,10 +35,3 @@ redisconf:
 
 IMAGE_UPLOAD_DIR: "/www/server/nginx/html/hmdp/imgs"
 
-aliyun:
-  oss:
-    file:
-      bucketname: mansay
-      endpoint: oss-cn-shenzhen.aliyuncs.com
-      keyid: LTAI5tPAGbNpuQSdjfdgv9yz
-      keysecret: bexYzKJ3A95XZLF8CSMWlHaaJnig2k

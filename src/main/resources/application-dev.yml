@@ -35,10 +35,3 @@ redisconf:
 
 IMAGE_UPLOAD_DIR: "D:\\lesson\\nginx-1.18.0\\html\\hmdp\\imgs"
 
-aliyun:
-  oss:
-    file:
-      bucketname: yygh-bgk
-      endpoint: oss-cn-chengdu.aliyuncs.com
-      keyid: LTAI5tPAGbNpuQSdjfdgv9yz
-      keysecret: bexYzKJ3A95XZLF8CSMWlHaaJnig2k
